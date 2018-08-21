@@ -1,0 +1,25 @@
+/**
+ *
+ * {{properCase name }}
+ *
+ */
+
+import React from 'react';
+{{#if wantHeaders}}
+import { Helmet } from 'react-helmet';
+{{/if}}
+
+export default class {{ properCase name }} extends {{{ type }}} { // eslint-disable-line react/prefer-stateless-function
+  render() {
+    return (
+      <div>
+      {{#if wantHeaders}}
+        <Helmet>
+          <title>{{properCase name}}</title>
+          <meta name="description" content="Description of {{properCase name}}" />
+        </Helmet>
+      {{/if}}
+      </div>
+    );
+  }
+}

@@ -1,0 +1,23 @@
+/**
+ *
+ * {{properCase name }}
+ *
+ */
+
+import React from 'react';
+{{#if wantHeaders}}
+import { Helmet } from 'react-helmet';
+{{/if}}
+
+const {{ properCase name }} = () => {
+  return (
+    <div>
+    {{#if wantHeaders}}
+      <Helmet>
+        <title>{{properCase name}}</title>
+        <meta name="description" content="Description of {{properCase name}}" />
+      </Helmet>
+    {{/if}}
+    </div>
+  );
+}

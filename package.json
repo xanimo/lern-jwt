@@ -1,0 +1,89 @@
+{
+  "name": "mern-jwt",
+  "version": "0.0.1",
+  "engines": {
+    "node": ">=6.0.0"
+  },
+  "description": "mern authentication boilerplate utilizing jwt",
+  "main": "index.js",
+  "scripts": {
+    "setup": "yarn && cd client && yarn",
+    "build": "node internals/scripts/build.js",
+    "deploy": "yarn build && yarn checkout",
+    "checkout": "git checkout -b deploy && npm run add",
+    "add": "git add -f client/build && npm run commit",
+    "commit": "git commit -m \"deploy\" && npm run push",
+    "push": "git push -f heroku deploy:master && npm run master",
+    "master": "git checkout master && npm run delete",
+    "delete": "git branch -D deploy",
+    "generate": "plop --plopfile internals/generators/index.js",
+    "ssl": "internals/scripts/generate-ssl-certs.sh",
+    "start": "cross-env NODE_ENV=production concurrently \"npm run server\" \"npm run client\"",
+    "server": "nodemon --watch server index.js",
+    "server-prod": "node index.js",
+    "client": "node internals/scripts/client.js",
+    "db:seed": "node server/db/seeds/seeder.js",
+    "test": "cd client && yarn test",
+    "lint": "eslint .",
+    "coverage": "nyc --reporter=html npm test",
+    "coveralls": "cat ./coverage/lcov.info | coveralls",
+    "prettify": "prettier --write"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/xanimo/mern-jwt.git"
+  },
+  "keywords": [
+    "Mern",
+    "MongoDB",
+    "Express",
+    "React",
+    "Node",
+    "Jwt"
+  ],
+  "author": "xanimo",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/xanimo/mern-jwt/issues"
+  },
+  "homepage": "https://github.com/xanimo/mern-jwt#readme",
+  "dependencies": {
+    "bcrypt-nodejs": "^0.0.3",
+    "body-parser": "^1.18.3",
+    "chalk": "^2.4.1",
+    "compression": "^1.7.3",
+    "cookie-parser": "^1.4.3",
+    "cors": "^2.8.4",
+    "csurf": "^1.9.0",
+    "cuid": "^2.1.2",
+    "dotenv": "^6.0.0",
+    "express": "^4.16.3",
+    "express-limiter": "^1.6.1",
+    "express-session": "^1.15.6",
+    "glob": "^7.1.2",
+    "helmet": "^3.13.0",
+    "jsonwebtoken": "^8.3.0",
+    "limax": "^1.6.0",
+    "mongoose": "^5.2.9",
+    "mongoose-seed": "^0.5.1",
+    "morgan": "^1.9.0",
+    "sanitize-html": "^1.18.4"
+  },
+  "devDependencies": {
+    "babel-eslint": "^8.2.6",
+    "concurrently": "^3.6.1",
+    "cross-env": "^5.2.0",
+    "eslint": "^5.4.0",
+    "eslint-config-airbnb": "^17.1.0",
+    "eslint-config-defaults": "^9.0.0",
+    "eslint-plugin-import": "^2.14.0",
+    "eslint-plugin-jsx-a11y": "^6.1.1",
+    "eslint-plugin-mongodb": "^1.0.0",
+    "eslint-plugin-node": "^7.0.1",
+    "eslint-plugin-react": "^7.11.1",
+    "istanbul": "^0.4.5",
+    "nodemon": "^1.18.3",
+    "nyc": "^12.0.2",
+    "plop": "^2.1.0"
+  }
+}
