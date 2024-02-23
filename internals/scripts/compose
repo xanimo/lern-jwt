@@ -1,0 +1,11 @@
+#!/bin/bash
+
+npm run clean
+npm run ssl
+./internals/scripts/setenv.sh
+npm run setup
+npm run build
+docker build --no-cache -t xanimo/mern-jwt -f Dockerfile.api .
+docker build --no-cache -t xanimo/mongo -f Dockerfile.db .
+# overwrite host mongo with localhost (127.0.0.1)
+cat .env | sed -E 's/(@)[^:]+(:.*)/\1127.0.0.1\2/' | tee .env

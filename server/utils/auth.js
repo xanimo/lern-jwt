@@ -3,6 +3,7 @@ const jwt = require('jsonwebtoken'),
 	  path = require('path'),
 	  User = require('../db/models/user.js'),
 	  config = require('../config'),
+	  getRole = require('../helpers').getRole,
 	  { APP_SECRET } = process.env;
 
 function getTimeout() {
@@ -37,7 +38,8 @@ function checkJwt(req, res, next) {
 			success: false,
 			message: 'Invalid token!'
 		});
-		User.findById(decodedData._id, (err, user) => {
+		User.findById(decodedData.sub._id)
+		.then((user) => {
 			if (!user) return res.json({
 				success: false,
 				message: 'Invalid token!  User does not exist!'
@@ -48,7 +50,24 @@ function checkJwt(req, res, next) {
 	});	
 };
 
+// Role authorization check
+function roleAuthorization(requiredRole) {
+	return function (req, res, next) {
+		const user = req.user;
+		User.findById(user._id)
+		.then((foundUser) => {
+			// If user is found, check role.
+			if (getRole(foundUser.role) >= getRole(requiredRole)) {
+				return next();
+			} else {
+				return res.status(401).json({ error: 'You are not authorized to view this content.' });
+			}
+		});
+	};
+};
+
 module.exports = {
 	signJwt,
-	checkJwt
+	checkJwt,
+	roleAuthorization
 }

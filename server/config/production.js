@@ -7,18 +7,23 @@ module.exports = {
 	},	
 	secure: {
 		ssl: true,
-		// privateKey: path.join(__dirname, './sslcerts/privkey.pem'),
-		// certificate: path.join(__dirname, './sslcerts/fullchain.pem')
+		privateKey: path.join(__dirname, './sslcerts/server.key'),
+		certificate: path.join(__dirname, './sslcerts/server.crt')
 	},
-	port: process.env.PORT || 8443,
+	port: process.env.PORT || 3001,
 	tokenTimeout: 3600,
 	db: {
-		uri: process.env.MONGODB_URI || `mongodb://${(process.env.DB_1_PORT_27017_TCP_ADDR || 'localhost')}/${defaultEnvConfig.app.title}`,
+		uri: process.env.MONGODB_URI,
 		options: {
-			user: '',
-			pass: '',
-			useNewUrlParser: true
-		},  
+			user: encodeURIComponent('user'),
+			pass: encodeURIComponent(process.env.MONGODB_PASSWORD),
+			ssl: true,
+			tlsInsecure: true,
+			authSource: 'users',
+			authMechanism: 'SCRAM-SHA-256',
+			tlsCAFile: path.join(__dirname, './sslcerts/rootCA.pem'),
+			// tlsCertificateKeyFile: path.join(__dirname, './sslcerts/mongodb.pem'),
+		},
 		debug: process.env.MONGODB_DEBUG || false
 	},
 	appSecret: process.env.APP_SECRET || 'zv9XwtTaITx7xEpuNHSooELlD1'

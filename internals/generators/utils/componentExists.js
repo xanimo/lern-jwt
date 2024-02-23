@@ -1,7 +1,7 @@
 const fs = require('fs'),
 	  path = require('path'),
-	  pageComponents = fs.readdirSync(path.join(__dirname, '../../../client/src/modules/components')),
-	  pageContainers = fs.readdirSync(path.join(__dirname, '../../../client/src/modules/containers')),
+	  pageComponents = fs.readdirSync(path.join(__dirname, '../../../client/src/components')),
+	  pageContainers = fs.readdirSync(path.join(__dirname, '../../../client/src/containers')),
 	  components = pageComponents.concat(pageContainers);
 
 const componentExists = comp => {

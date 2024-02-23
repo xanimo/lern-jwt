@@ -10,7 +10,6 @@ module.exports = {
 		options: {
 			user: '',
 			pass: '',
-			useNewUrlParser: true 
 		},
 		debug: process.env.MONGODB_DEBUG || false
 	},

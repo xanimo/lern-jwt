@@ -1,15 +1,16 @@
 import React from 'react';
-import ReactDOM from 'react-dom';
-import { BrowserRouter as Router } from 'react-router-dom';
-import Routes from './routes';
-import registerServiceWorker from './registerServiceWorker';
+import { createRoot } from 'react-dom/client';
+import BrowserRoutes from './routes';
+import registerServiceWorker from './service-worker';
 import './index.css';
 import './bin/bootstrap';
 
 require('dotenv').config();
-ReactDOM.render(
-	<Router><Routes /></Router>,
-	document.getElementById('root')
-)
-
+const container = document.getElementById('root');
+const root = createRoot(container); // createRoot(container!) if you use TypeScript
+root.render(
+  <React.StrictMode>
+      <BrowserRoutes />
+  </React.StrictMode>
+);
 registerServiceWorker();

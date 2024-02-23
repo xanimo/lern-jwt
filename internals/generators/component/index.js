@@ -49,12 +49,12 @@ module.exports = {
 
     const actions = [{
       type: 'add',
-      path: '../../client/src/modules/components/{{properCase name}}/index.js',
+      path: '../../client/src/components/{{properCase name}}/index.js',
       templateFile: componentTemplate,
       abortOnFail: true,
     }, {
       type: 'add',
-      path: '../../client/src/modules/components/{{properCase name}}/tests/index.test.js',
+      path: '../../client/src/components/{{properCase name}}/tests/index.test.js',
       templateFile: './component/test.js.hbs',
       abortOnFail: true,
     }];
@@ -63,7 +63,7 @@ module.exports = {
     if (data.wantLoadable) {
       actions.push({
         type: 'add',
-        path: '../../client/src/modules/components/{{properCase name}}/Loadable.js',
+        path: '../../client/src/components/{{properCase name}}/Loadable.js',
         templateFile: './component/loadable.js.hbs',
         abortOnFail: true,
       });

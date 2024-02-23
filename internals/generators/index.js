@@ -8,7 +8,7 @@ module.exports = (plop) => {
 	plop.setGenerator('container', containerGenerator);
 	plop.addHelper('directory', (comp) => {
 		try {
-			fs.accessSync(path.join(__dirname, `../../client/src/modules/containers/${comp}`), fs.F_OK);
+			fs.accessSync(path.join(__dirname, `../../client/src/containers/${comp}`), fs.F_OK);
 			return `containers/${comp}`;
 		} catch (e) {
 			return `component/${comp}`;

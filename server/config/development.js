@@ -13,11 +13,10 @@ module.exports = {
 	port: process.env.PORT || 8443,
 	tokenTimeout: 3600,
 	db: {
-		uri: process.env.MONGODB_URI || `mongodb://${(process.env.DB_1_PORT_27017_TCP_ADDR || 'localhost')}/mern-stack`,
+		uri: process.env.MONGODB_URI,
 		options: {
 			user: '',
 			pass: '',
-			useNewUrlParser: true
 		},
 		debug: process.env.MONGODB_DEBUG || false
 	},

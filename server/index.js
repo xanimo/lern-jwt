@@ -10,10 +10,10 @@ const express = require('express'),
 	  https = require('https'),
 	  cors = require('cors'),
 	  helmet = require('helmet'),
-	  csrf = require('csurf'),
+	  csrf = require('csrf'),
 	  routes = require('./routes'),
 	  db = require('./db'),
-	  whitelist = ['http://localhost:3000', 'https://mern-jwt.herokuapp.com'];
+	  whitelist = ['https://localhost:3000', 'https://localhost:3001', 'http://localhost:3000', 'http://localhost:3001'];
 
 module.exports.start = (config) => {
 	const app = express(),
@@ -51,7 +51,27 @@ module.exports.start = (config) => {
 
 	app.use(compression());
 	app.use(cors(optionsDelegate));
-	app.use(helmet())
+
+	if (process.env.NODE_ENV === 'production') {
+		app.use(express.static('client/build'));
+	}
+
+	app.use(
+		helmet({
+		  hsts: {
+			maxAge: 31536000,
+		  },
+		  contentSecurityPolicy: {
+			useDefaults: false,
+			directives: {
+			  "default-src": [`'self' http://localhost:3000 https://localhost:3001/favicon.ico`],
+			  "frame-ancestors": ["'self'"],
+			},
+		  },
+		  frameguard: {
+			action: "deny",
+		  },
+		}))
 
 	if (process.env.NODE_ENV === 'test') {
 		app.use(morgan(() => {
@@ -71,17 +91,13 @@ module.exports.start = (config) => {
 
 	app.use(express.static(path.resolve(__dirname, '..', '..', 'public')))
 
-	if (process.env.NODE_ENV === 'production') {
-		app.use(express.static('client/build'));
-	} 
-
 	app.use(function(req, res, next) {
         res.setHeader("Access-Control-Allow-Methods", "POST, PUT, OPTIONS, DELETE, GET");
         res.header("Access-Control-Allow-Origin", "*");
         res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
         res.header("Access-Control-Allow-Credentials", true);
     	next();
-    });	
+    });
 
     app.use((err, req, res, next) => {
     	res.locals.message = err.message;
@@ -93,19 +109,15 @@ module.exports.start = (config) => {
     	});
     });
 
-  //   if (configSSL.key.length) {
-		// server = https.createServer(configSSL, app);
-  //   } else {
-  //   	server = http.createServer(app);
-  //   };
-    const server = http.createServer(app);
+    if (configSSL.key.length && process.env.NODE_ENV == 'production') {
+		server = https.createServer(configSSL, app);
+    } else {
+    	server = http.createServer(app);
+    };
+
 	server.listen(port, function() {
 		console.log('App running on ' + port);
 	});
-	server.on('error', onError);
-	server.on('listening', onListening);
-
-	return app;
 
 	function onError(error) {
 		if (error.syscall !== 'listen') {
@@ -141,4 +153,9 @@ module.exports.start = (config) => {
 		  : `port ${addr.port}`;
 		console.log(`Listening on ${bind}`);
 	}
+
+	server.on('error', onError);
+	server.on('listening', onListening);
+
+	return app;
 }

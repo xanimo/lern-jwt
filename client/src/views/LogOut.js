@@ -1,14 +1,14 @@
 import React from 'react'
-import { Redirect } from 'react-router-dom'
+import { Navigate } from 'react-router-dom'
 
 class LogOut extends React.Component {
 
 	componentDidMount() {
-		this.props.onLogOut()
+		this.props.onLogOut();
 	}
 	
 	render() {
-		return <Redirect to="/login" />
+		return <Navigate to="/" />
 	}
 }
 

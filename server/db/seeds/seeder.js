@@ -1,63 +1,39 @@
-const seeder = require('mongoose-seed'),
-      config = require('../../config');
-
-const data = [
+module.exports.data = [
   {
-    model: 'Post',
+    model: 'User',
     documents: [
       {
-        page: '507f191e810c19729de860ea',
-        title: 'Test Title',
-        content: 'Test Content',
-        slug: 'test-slug',
-        cuid: '930jf09f3092902'
-      }
-    ]
-  },
-  {
-    model: 'Tag',
-    documents: [
-      {
-        name: 'tag1'
+        firstName: 'king',
+        lastName: 'bluezr',
+        name: 'king bluezr',
+        email: 'bluezr@dogecoin.com',
+        password: 'w;xr^R=8c4h6"LA',
+        role: 'Admin'
       },
       {
-        name: 'tag2'
+        firstName: 'bluezr',
+        lastName: 'sickonasty',
+        name: 'bluezr sickonasty',
+        email: 'bluezr@sickonasty.net',
+        password: 'u0T6#LvF9uV92Rbt',
+        role: 'Owner'
       },
       {
-        _id: '507f191e810c19729de860ea',
-        name: 'tag3'
-      }
-    ]
-  },
-  {
-    model: 'Page',
-    documents: [
-      {
-        _id: '507f191e810c19729de860ea',
-        name: 'About'
+        firstName: 'bluezr',
+        lastName: '666',
+        name: 'bluezr 666',
+        email: 'bluezr666@gmail.com',
+        password: 'F%a6lLCSdvxHjNCY',
+        role: 'Client'
       },
       {
-        name: 'Press'
+        firstName: 'dakoda',
+        lastName: 'greaves',
+        name: 'dakoda greaves',
+        email: 'dakodagreaves@gmail.com',
+        password: '6Vez*fE^K%*KyQxE',
+        role: 'Member'
       },
-      {
-        name: 'Photo'
-      },
-      {
-        name: 'Video'
-      },
-      {
-        name: 'Mixes'
-      }
     ]
   }
 ];
-
-seeder.connect(config.db.uri, () => {
-  seeder.loadModels(['server/db/models/post.js', 'server/db/models/tag.js', 'server/db/models/page.js']);
-  seeder.clearModels(['Post', 'Tag', 'Page'], () => {
-    seeder.populateModels(data, function() {
-      console.log('done seeding database');
-      process.exit(0);
-    })
-  });
-});

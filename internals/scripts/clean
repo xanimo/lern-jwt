@@ -1,0 +1,6 @@
+#!/bin/bash
+
+rm server/config/sslcerts/*.key
+rm server/config/sslcerts/*.crt
+rm server/config/sslcerts/*.csr
+rm server/config/sslcerts/*.pem

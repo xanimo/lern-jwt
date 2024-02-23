@@ -4,7 +4,7 @@ const _ = require('lodash'),
 	  fs = require('fs'),
 	  path = require('path');
 
-require('dotenv').load();
+require('dotenv').config();
 
 const validateEnvironmentVariable = () => {
 	const environmentFiles = glob.sync(`./server/config/${process.env.NODE_ENV}.js`);

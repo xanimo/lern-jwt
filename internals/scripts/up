@@ -1,0 +1,4 @@
+#!/bin/bash
+
+docker run -it --restart=always -p 27017:27017 -d --network=bridge --name mongo -t xanimo/mongo
+docker run -it --restart=always -p 3001:3001 --link mongo:mongo --name mern-jwt -d -t xanimo/mern-jwt

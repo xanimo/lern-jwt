@@ -4,15 +4,14 @@ const express = require('express'),
       checkJwt = require('../utils/auth').checkJwt;
 
 router.route('/')
-	.get(users.list)
+	.get(checkJwt, users.list)
 	.post(users.create);
 
-router.post('/authenticate', users.authenticate);
-
-router.use(checkJwt);
 router.route('/:id')
 	.get(users.show)
 	.patch(users.update)
 	.delete(users.delete);
+
+router.post('/authenticate', users.authenticate);
 
 module.exports = router;
