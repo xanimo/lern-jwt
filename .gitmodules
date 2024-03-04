@@ -1,0 +1,6 @@
+[submodule "docker"]
+	path = docker
+	url = https://github.com/xanimo/docker
+[submodule "libdogecoin"]
+	path = libdogecoin
+	url = https://github.com/xanimo/libdogecoin
