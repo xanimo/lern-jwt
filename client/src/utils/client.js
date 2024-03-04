@@ -15,6 +15,24 @@ client.setToken = function(token) {
 	return token;
 }
 
+client.getQuery = function() {
+	return  JSON.parse(localStorage.getItem("query"));
+}
+
+client.setQuery = function(query) {
+	localStorage.setItem("query", JSON.stringify(query));
+	return query;
+}
+
+client.getArgs = function() {
+	return  JSON.parse(localStorage.getItem("args"));
+}
+
+client.setArgs = function(args) {
+	localStorage.setItem("args", JSON.stringify(args));
+	return args;
+}
+
 client.getCurrentUser = function() {
 	const token = this.getToken();
 	if (token) return jwtDecode(token);
@@ -43,11 +61,13 @@ client.fetchUsers = () => {
 	}
 }
 
-client.getProtectedRoute = async function() {
+client.getProtectedRoute = async function(command, args) {
+this.setQuery(command);
+this.setArgs(args);
 return await this({ 
 	method: 'get', 
-	url: `${API_URL}/api/private`, 
-	data: this.getToken() 
+	url: `${API_URL}/api/private/${command}`, 
+	params: { args },
 	})
 	.then(serverResponse => {
 		return serverResponse.data;

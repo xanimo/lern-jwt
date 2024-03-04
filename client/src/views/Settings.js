@@ -33,10 +33,10 @@ class Settings extends Component {
         const currentUser = client.getCurrentUser();
         const users = client.getUsers();
         return (
-            <div className="container form-group"
+            <div className="container-fluid form-group"
                 onChange={this.onInputChange.bind(this)}
                 onSubmit={this.onFormSubmit.bind(this)}>
-                <Tabs className="mb-3 p-1 fade show shadow-pop-tl container">
+                <Tabs className="mb-3">
                     <Tab className="login text-center" eventKey="profile" title="Profile">
                         <div className="alert-success alert-dismissible fade show shadow-pop-tl">
                         <table className="table table-striped table-sm">

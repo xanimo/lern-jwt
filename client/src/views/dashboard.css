@@ -1,0 +1,9 @@
+#command {
+    position: relative;
+    z-index: 9999;
+}
+
+#args {
+    position: relative;
+    z-index: 9998;
+}
