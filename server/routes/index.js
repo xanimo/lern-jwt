@@ -22,13 +22,8 @@ module.exports.init = (app) => {
 	app.get('/api/private', checkJwt, roleAuthorization(ROLE_ADMIN), dogeauth.middleware, async function (req, res) {
 		if (!req.sin || req.sin != process.env.SIN) return res.status(200).json({ error: 'Unauthorized' });
 		const decrypted =  await decryptMessage(Buffer.from(process.env.PRIVATE_KEY_HEX, 'hex'), req.headers.data);
-		const decoded = decrypted.split('"""').join('').split('"').map((v, i) => {
-			if (i == 1 && v != undefined) {
-				return v;
-			}
-		})[1];
-		if (is_command(decoded)) {
-			exec('docker exec dogecoin dogecoin-cli ' + decoded, (error, stdout, stderr) => {
+		if (is_command(decrypted.split('"')[1])) {
+			exec('docker exec dogecoin dogecoin-cli ' + decrypted.split('"')[1] + ' ' + decrypted.split('"')[3], (error, stdout, stderr) => {
 				if (error) {
 					console.error(`error: ${error.message}`);
 					return res.status(200).json({ message: "Hello from a private endpoint! You need to be authenticated and have a role of admin to see this.", data: error.message });
