@@ -54,6 +54,8 @@ module.exports.start = (config) => {
 
 	if (process.env.NODE_ENV === 'production') {
 		app.use(express.static('client/build'));
+	} else {
+		app.use(express.static(path.resolve(__dirname, '..', '..', 'public')));
 	}
 
 	app.use(
@@ -62,9 +64,9 @@ module.exports.start = (config) => {
 			maxAge: 31536000,
 		  },
 		  contentSecurityPolicy: {
-			useDefaults: false,
+			useDefaults: true,
 			directives: {
-			  "default-src": [`'self' http://localhost:3000 https://localhost:3001/favicon.ico`],
+			  "default-src": [`'self'`],
 			  "frame-ancestors": ["'self'"],
 			},
 		  },
@@ -89,8 +91,6 @@ module.exports.start = (config) => {
 
 	routes.init(app);
 
-	app.use(express.static(path.resolve(__dirname, '..', '..', 'public')))
-
 	app.use(function(req, res, next) {
         res.setHeader("Access-Control-Allow-Methods", "POST, PUT, OPTIONS, DELETE, GET");
         res.header("Access-Control-Allow-Origin", "*");
@@ -103,6 +103,8 @@ module.exports.start = (config) => {
     	res.locals.message = err.message;
     	res.locals.error = req.app.get('env') === 'development' ? err : err;
     	const errStatus = err.status || 500;
+		console.log(err.status);
+		console.log(res.locals.error);
     	res.status(errStatus);
     	res.json({
     		error: errStatus.toString()

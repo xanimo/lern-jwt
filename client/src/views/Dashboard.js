@@ -53,7 +53,7 @@ class Dashboard extends Component {
     })
   }
 
-  render() {
+  render = () => {
     const { command, args, message, data } = this.state.fields;
     client.fetchUsers();
     const command_options = commands.map((value, index) => {

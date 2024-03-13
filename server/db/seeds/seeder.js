@@ -1,37 +1,49 @@
+const dogeauth = require('dogeauth');
+const { generateRandomPassphrase } = require('../models/user');
+const { init } = require('@paralleldrive/cuid2');
+const {
+    randomBytes,
+  } = import('node:crypto');
+
+  // The init function returns a custom createId function with the specified
+// configuration. All configuration properties are optional.
+const createId = init({
+  // A custom random function with the same API as Math.random.
+  // You can use this to pass a cryptographically secure random function.
+  random: randomBytes,
+  // the length of the id
+  length: 64,
+  // A custom fingerprint for the host environment. This is used to help
+  // prevent collisions when generating ids in a distributed system.
+  fingerprint: process.env.APP_SECRET,
+});
+
 module.exports.data = [
   {
     model: 'User',
     documents: [
       {
-        firstName: 'king',
-        lastName: 'bluezr',
-        name: 'king bluezr',
-        email: 'bluezr@dogecoin.com',
-        password: 'w;xr^R=8c4h6"LA',
+        id: createId(),
+        sin: dogeauth.generateSin(),
+        password: generateRandomPassphrase(),
         role: 'Admin'
       },
       {
-        firstName: 'bluezr',
-        lastName: 'sickonasty',
-        name: 'bluezr sickonasty',
-        email: 'bluezr@sickonasty.net',
-        password: 'u0T6#LvF9uV92Rbt',
+        id: createId(),
+        sin: dogeauth.generateSin(),
+        password: generateRandomPassphrase(),
         role: 'Owner'
       },
       {
-        firstName: 'bluezr',
-        lastName: '666',
-        name: 'bluezr 666',
-        email: 'bluezr666@gmail.com',
-        password: 'F%a6lLCSdvxHjNCY',
+        id: createId(),
+        sin: dogeauth.generateSin(),
+        password: generateRandomPassphrase(),
         role: 'Client'
       },
       {
-        firstName: 'dakoda',
-        lastName: 'greaves',
-        name: 'dakoda greaves',
-        email: 'dakodagreaves@gmail.com',
-        password: '6Vez*fE^K%*KyQxE',
+        id: createId(),
+        sin: dogeauth.generateSin(),
+        password: generateRandomPassphrase(),
         role: 'Member'
       },
     ]

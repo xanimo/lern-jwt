@@ -1,6 +1,5 @@
-const mongoose = require('mongoose'),
-	Schema = mongoose.Schema,
-	bcrypt = require('bcrypt'),
+const bcrypt = require('bcrypt'),
+	crypto = require('crypto'),
 	validator = require('validator'),
 	generatePassword = require('generate-password'),
 	owasp = require('owasp-password-strength-test'),
@@ -9,42 +8,29 @@ const mongoose = require('mongoose'),
 	ROLE_OWNER = require('../../constants').ROLE_OWNER,
 	ROLE_ADMIN = require('../../constants').ROLE_ADMIN;
 
+
 const validateLocal = property => {
 	return ((this.provider !== 'local' && !this.updated) || property.length);
 };
 
-/**
- * A Validation function for local strategy email
- */
-const validateLocalStrategyEmail = (email) => {
-	return ((this.provider !== 'local' && !this.updated) || validator.isEmail(email));
-};
-
-const UserSchema = new Schema({
-	firstName: {
-		type: String,
-		trim: true,
-		default: '',
-		validate: [validateLocal, 'Please provide a first name!']
-	},
-	lastName: {
-		type: String,
-		trim: true,
-		default: '',
-		validate: [validateLocal, 'Please provide a last name!']
-	},
-	displayName: {
-	  type: String,
-	  trim: true
-	},
-	email: {
+const UserSchema = {
+	id: {
 		type: String,
 		required: true,
 		unique: true,
 		lowercase: true,
 		trim: true,
 		default: '',
-		validate: [validateLocalStrategyEmail, 'Please fill a valid email address']
+		validate: [validateLocal, 'Please provide an id!']
+	},
+	sin: {
+		type: String,
+		required: true,
+		unique: true,
+		lowercase: true,
+		trim: true,
+		default: '',
+		validate: [validateLocal, 'Please provide a sin!']
 	},
 	password: {
 		type: String,
@@ -70,25 +56,26 @@ const UserSchema = new Schema({
 	},
 	resetPasswordExpires: {
 		type: Date
-	}
-}, { timestamps: true });
+	},
+	timestamps: true
+};
 
-UserSchema.statics.generateHash = function(password) {
-	return bcrypt.hashSync(password, bcrypt.genSaltSync(8))
-}
+// UserSchema.statics.generateHash = function(password) {
+// 	return bcrypt.hashSync(password, bcrypt.genSaltSync(8))
+// }
 
-UserSchema.methods.generateHash = function(password) {
-	return bcrypt.hashSync(password, bcrypt.genSaltSync(8))
-}
+// UserSchema.methods.generateHash = function(password) {
+// 	return bcrypt.hashSync(password, bcrypt.genSaltSync(8))
+// }
 
-UserSchema.methods.validPassword = function(password) {
-	return bcrypt.compareSync(password, this.password)
-}
+// UserSchema.methods.validPassword = function(password) {
+// 	return bcrypt.compareSync(password, this.password)
+// }
 
 /**
  * Hook a pre validate method to test the local password
  */
-UserSchema.pre('validate', function (next) {
+module.exports = preValidate = function (next) {
   if (this.provider === 'local' && this.password && this.isModified('password')) {
     console.log('validating password:', this.password);
     const result = owasp.test(this.password);
@@ -99,14 +86,14 @@ UserSchema.pre('validate', function (next) {
     }
   }
   next();
-});
+};
 
 /**
  * Create instance method for hashing a password
  */
-UserSchema.methods.hashPassword = function (password) {
-	if (this.salt && password) {
-		return crypto.pbkdf2Sync(password, Buffer.from(this.salt, 'base64'), 10000, 64, 'sha1').toString('base64');
+module.exports = hashPassword = function (password) {
+	if (process.env.APP_SECRET && password) {
+		return crypto.pbkdf2Sync(password, Buffer.from(process.env.APP_SECRET, 'base64'), 10000, 64, 'sha512').toString('base64');
 	}
 	return password;
 };
@@ -114,7 +101,7 @@ UserSchema.methods.hashPassword = function (password) {
 /**
  * Create instance method for authenticating user
  */
-UserSchema.methods.authenticate = function (password) {
+module.exports = authenticate = function (password) {
 	return this.password === this.hashPassword(password);
 };
 
@@ -123,8 +110,7 @@ UserSchema.methods.authenticate = function (password) {
  * Returns a promise that resolves with the generated passphrase, or rejects with an error if something goes wrong.
  * NOTE: Passphrases are only tested against the required owasp strength tests, and not the optional tests.
  */
-UserSchema.statics.generateRandomPassphrase = function () {
-	return new Promise((resolve, reject) => {
+module.exports = generateRandomPassphrase = function () {
 		let password = '';
 		const repeatingCharacters = new RegExp('(.)\\1{2,}', 'g');
 
@@ -146,21 +132,23 @@ UserSchema.statics.generateRandomPassphrase = function () {
 
 		// Send the rejection back if the passphrase fails to pass the strength test
 		if (owasp.test(password).errors.length) {
-			reject(new Error('An unexpected problem occurred while generating the random passphrase'));
+			return new Error('An unexpected problem occurred while generating the random passphrase');
 		} else {
 			// resolve with the validated passphrase
-			resolve(password);
+			return password;
 		}
-	});
 };
 
-UserSchema.pre('save', function(next) {
-	if(this.isModified('password')) {
-		this.password = this.generateHash(this.password)
-	}
-	next()
-})
+// module.exports = UserSchema.pre('save', function(next) {
+// 	if(this.isModified('password')) {
+// 		this.password = this.generateHash(this.password)
+// 	}
+// 	next()
+// })
 
-const ModelClass = mongoose.model('User', UserSchema);
-
-module.exports = ModelClass;
+module.exports = {
+	UserSchema,
+	authenticate,
+	hashPassword,
+	generateRandomPassphrase
+}

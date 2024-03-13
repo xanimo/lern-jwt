@@ -5,8 +5,8 @@ import { NotFound } from '../views';
 
 export const Public = (props) => {
   const onLoginSuccess = () => {
-    history.push('/admin');
-    window.location.reload('/admin');
+    history.push('/dashboard');
+    window.location.reload('/dashboard');
   }
   return (
       <Routes>

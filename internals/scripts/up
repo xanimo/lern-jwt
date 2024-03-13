@@ -1,4 +1,23 @@
 #!/bin/bash
 
-docker run -it --restart=always -p 27017:27017 -d --network=bridge --name mongo -t xanimo/mongo
-docker run -it --restart=always -p 3001:3001 --link mongo:mongo --name mern-jwt -d -t xanimo/mern-jwt
+# docker compose up
+# docker run -it --restart=always -p 27017:27017 -d --network=bridge --name mongo -t xanimo/mongo
+if docker inspect mern-jwt | grep -o '"Status": "running"'; then
+    echo true
+    docker stop mern-jwt
+    docker rm mern-jwt
+fi
+
+if docker inspect dogecoin | grep -o '"Status": "running"'; then
+    echo true
+    docker stop dogecoin
+    docker rm dogecoin
+fi
+
+# docker compose up --detach
+# sleep 5
+# docker exec -it mern-jwt-app-1 cat .env > .env
+docker run -it --restart=always -d --network=bridge -v /mnt/volumes/core:/home/dogecoin/.dogecoin --name dogecoin -t xanimo/dogecoin:1.14.7
+sleep 5
+# docker run -it --privileged --restart=always -p 3001:3001 --link dogecoin:dogecoin --name mern-jwt -d -t xanimo/mern-jwt
+npm run server-prod

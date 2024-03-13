@@ -1,3 +1,5 @@
+const { getuser } = require('../db/level.js');
+
 const jwt = require('jsonwebtoken'),
 	  fs = require('fs'),
 	  path = require('path'),
@@ -16,10 +18,11 @@ function getTimeout() {
 };
 
 function signJwt(user) {
-	const userData = user.toObject(),
+	const userData = user,
 		  timestamp = Math.floor(Date.now() / 1000),
 		  exp = timestamp + getTimeout();
 	delete userData.password
+	delete userData.sin.priv
 	return jwt.sign({
 		sub: userData,
 		iat: timestamp,
@@ -33,12 +36,13 @@ function checkJwt(req, res, next) {
 		success: false,
 		message: 'No token provided!'
 	});
+	console.log(token);
 	jwt.verify(token, APP_SECRET, (err, decodedData) => {
 		if (err) return res.json({
 			success: false,
 			message: 'Invalid token!'
 		});
-		User.findById(decodedData.sub._id)
+		getuser(decodedData.sub.id)
 		.then((user) => {
 			if (!user) return res.json({
 				success: false,
@@ -54,7 +58,7 @@ function checkJwt(req, res, next) {
 function roleAuthorization(requiredRole) {
 	return function (req, res, next) {
 		const user = req.user;
-		User.findById(user._id)
+		getuser(user.id)
 		.then((foundUser) => {
 			// If user is found, check role.
 			if (getRole(foundUser.role) >= getRole(requiredRole)) {

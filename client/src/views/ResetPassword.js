@@ -25,7 +25,7 @@ export default class ResetPassword extends Component {
   constructor(props) {
     super(props);
     this.state = {
-      fields: { email: this.props.currentUser.sub.email, password_one: '', password_two: '', currentUser: this.props.currentUser.sub._id, error: '', message: '' }
+      fields: { password_one: '', password_two: '', id: this.props.currentUser.sub.id, error: '', message: '' }
     }
   }
 
@@ -53,21 +53,23 @@ export default class ResetPassword extends Component {
       }
       return errors;
     }
-    client.patch(`api/users/${this.state.fields.currentUser}`, this.state.fields)
+    client.update(this.state.fields)
       .then((response) => {
-        const token = response.data.token;
+        console.log('response', response);
+        console.log('response', response.success);
+        const token = response.token;
         if (token) {
           // sets token as an included header for all subsequent api requests
           client.defaults.headers.common.token = client.setToken(token);
           const decodedToken = client.getCurrentUser();
-          localStorage.setItem('user', decodedToken.sub._id);
+          localStorage.setItem('user', JSON.stringify(decodedToken.sub));
         }
-        return response.data.success === false ? (
+        return response.success === false ? (
           this.setState({
             fields: {
               email: '',
               password: '',
-              error: response.data.message
+              error: response.message
             }
           })
         ) : (
@@ -75,19 +77,54 @@ export default class ResetPassword extends Component {
             fields: {
               email: '',
               password: '',
-              currentUser: client.getCurrentUser().sub._id,
+              currentUser: client.getCurrentUser().sub.id,
               message: 'Success! Your password has been updated and your authentication token has been refreshed.'
             }
           })
         )
       })
-      .catch((err) => {
-        console.log(err);
-      });
+      .catch((error) => {
+        console.log(error);
+      })
+    // const encoded = Buffer.from(client.JsonToArray(this.state.fields));
+    // console.log(encoded);
+    // const encrypted = client.encrypt(Buffer.from(process.env.PRIVATE_KEY_HEX, 'hex'), encoded);
+    // console.log(encrypted);
+    // client.patch(`api/users/${this.state.fields.currentUser}`, encrypted)
+    //   .then((response) => {
+    //     const token = response.data.token;
+    //     if (token) {
+    //       // sets token as an included header for all subsequent api requests
+    //       client.defaults.headers.common.token = client.setToken(token);
+    //       const decodedToken = client.getCurrentUser();
+    //       localStorage.setItem('user', decodedToken.sub.id);
+    //     }
+    //     return response.data.success === false ? (
+    //       this.setState({
+    //         fields: {
+    //           email: '',
+    //           password: '',
+    //           error: response.data.message
+    //         }
+    //       })
+    //     ) : (
+    //       this.setState({
+    //         fields: {
+    //           email: '',
+    //           password: '',
+    //           currentUser: client.getCurrentUser().sub.id,
+    //           message: 'Success! Your password has been updated and your authentication token has been refreshed.'
+    //         }
+    //       })
+    //     )
+    //   })
+    //   .catch((err) => {
+    //     console.log(err);
+    //   });
   };
 
   render() {
-    const { currentUser, password_one, password_two, error, message } = this.state.fields;
+    const { id, password_one, password_two, error, message } = this.state.fields;
     return (
       <form
         onChange={this.onInputChange.bind(this)}

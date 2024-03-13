@@ -2,8 +2,6 @@ FROM node:20-bullseye-slim
 
 WORKDIR /home/app
 
-ADD package.json /home/app
-ADD .env /home/app/.env
 ADD . /home/app/
 RUN npm i -g npm@latest serve cross-env concurrently
 RUN npm run setup

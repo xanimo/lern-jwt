@@ -1,7 +1,6 @@
-import React, { Component, useState } from 'react';
+import React, { Component } from 'react';
 import { Tabs, Tab } from "react-bootstrap";
 import { client } from "../utils";
-import history from "history/browser";
 import ResetPassword from './ResetPassword';
 import SearchBar from '../components/SearchBar';
 import './LogIn.css';
@@ -11,7 +10,7 @@ class Settings extends Component {
         super(props)
         this.state = {
             title: '',
-            fields: { email: '', password: '', message: '' }
+            fields: { message: '' }
         }
     }
 
@@ -29,39 +28,37 @@ class Settings extends Component {
     };
 
     render() {
-        const { email, password, message } = this.state.fields;
         const currentUser = client.getCurrentUser();
-        const users = client.getUsers();
         return (
             <div className="container-fluid form-group"
                 onChange={this.onInputChange.bind(this)}
                 onSubmit={this.onFormSubmit.bind(this)}>
                 <Tabs className="mb-3">
-                    <Tab className="login text-center" eventKey="profile" title="Profile">
-                        <div className="alert-success alert-dismissible fade show shadow-pop-tl">
-                        <table className="table table-striped table-sm">
-                            <thead>
-                                <tr>
-                                    <th scope="col">Key</th>
-                                    <th scope="col">Value</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                {Object.keys(currentUser).map((k, i) => {
-                                    if (Object.hasOwn(currentUser[k], '_id')) {
-                                        return Object.keys(currentUser[k]).map((value, index) => {
-                                            return <tr key={index}><td>{value}</td><td>{currentUser[k][value]}</td></tr>
-                                        })
-                                    } else {
-                                        return <tr key={i}><td>{k}</td><td>{currentUser[k]}</td></tr>
-                                    }
-                                })}
-                            </tbody>
-                        </table>
+                    <Tab eventKey="profile" title="Profile">
+                        <div className="alert-success alert-dismissible fade show rounded shadow-pop-tl">
+                            <table className="table table-striped table-sm">
+                                <thead>
+                                    <tr>
+                                        <th scope="col">Key</th>
+                                        <th scope="col">Value</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {Object.keys(currentUser.sub).map((k, i) => {
+                                        if (Object.hasOwn(currentUser.sub[k], 'sin')) {
+                                            return Object.keys(currentUser.sub[k]).map((value, index) => {
+                                                return <tr key={index}><td>{value}</td><td>{currentUser.sub[k][value]}</td></tr>
+                                            })
+                                        } else {
+                                            return <tr key={i}><td>{k}</td><td>{currentUser.sub[k]}</td></tr>
+                                        }
+                                    })}
+                                </tbody>
+                            </table>
                         </div>
                     </Tab>
                     <Tab eventKey="reset-password" title="Reset Password">
-                        <div className="container">
+                        <div className="container-fluid">
                             <ResetPassword currentUser={currentUser} />
                         </div>
                     </Tab>

@@ -1,17 +1,18 @@
 'use strict'
 
-require('dotenv').config();
-
 const webpack = require('webpack');
 const path = require('path');
+const fs = require('fs');
 const autoprefixer = require('autoprefixer');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
 const NodePolyfillPlugin = require('node-polyfill-webpack-plugin');
 const TerserPlugin = require("terser-webpack-plugin");
 const CopyWebpackPlugin = require("copy-webpack-plugin");
+const Dotenv = require('dotenv-webpack');
+require('dotenv').config();
 
 module.exports = {
-    mode: 'development',
+    mode: 'production',
     devtool: "inline-source-map",
     entry: './src/index.js',
     output: {
@@ -42,13 +43,15 @@ module.exports = {
     },
     plugins: [
         new NodePolyfillPlugin(),
-
+        new Dotenv(),
+        new webpack.NormalModuleReplacementPlugin(/node:/, (resource) => {
+            resource.request = resource.request.replace(/^node:/, "");
+        }),
         new CopyWebpackPlugin({
             patterns:[
                 {
                     from:'./src/service-worker.js',
                     to:path.resolve(__dirname, 'build', '[name][ext]'),
-                
                 }
             ]
         }),
@@ -94,6 +97,14 @@ module.exports = {
     module: {
         rules: [
             {
+                test: /\.(der)$/i,
+                use: [
+                  {
+                    loader: 'file-loader',
+                  },
+                ],
+            },
+            {
                 test: /\.(js|jsx)$/,
                 use: 'babel-loader',
                 exclude: /node_modules/
@@ -129,7 +140,15 @@ module.exports = {
         ]
     },
     resolve: {
-        extensions: ['.ts', '.js', '.json', '.wasm', '.html'],
+        extensions: ['.ts', '.js', '.json', '.wasm', '.html', '.ico', '.css', '.scss'],
+        fallback: {
+            assert: require.resolve('assert'),
+            crypto: require.resolve('crypto-browserify'),
+            http: require.resolve('stream-http'),
+            https: require.resolve('https-browserify'),
+            os: require.resolve('os-browserify/browser'),
+            stream: require.resolve('stream-browserify'),
+        },
     },
     performance: {
       hints: false,

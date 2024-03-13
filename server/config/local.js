@@ -12,13 +12,5 @@ module.exports = {
 	},
 	port: process.env.PORT || 8443,
 	tokenTimeout: 3600,
-	db: {
-		uri: process.env.MONGODB_URI,
-		options: {
-			user: '',
-			pass: '',
-		},
-		debug: process.env.MONGODB_DEBUG || false
-	},
 	appSecret: process.env.APP_SECRET || 'zv9XwtTaITx7xEpuNHSooELlD1'
 };

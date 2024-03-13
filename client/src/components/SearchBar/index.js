@@ -4,25 +4,67 @@
 *
 */
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { client } from '../../utils';
 
-const SearchBar = () => {
-	const [searchInput, setSearchInput] = useState("");
-	const [users, setUsers] = useState(client.getUsers());
+const preInit = async () => {
+	return await client.getUsers();
+}
 
+const SearchBar = () => {
+	const [loading, setLoading] = useState(true);
+	const [error, setError] = useState(null);
+	const [users, setUsers] = useState("");
+	const [searchInput, setSearchInput] = useState("");
+	
+	useEffect(() => {
+		async function fetchData() {
+		  try {
+			const users = await client.getUsers();
+			setUsers(users);
+			setLoading(false);
+		  } catch (error) {
+			setError(error);
+			setLoading(false);
+		  }
+		}
+	
+		fetchData();
+	  }, []);
+
+	if (loading) {
+	return <div>Loading...</div>;
+	}
+
+	if (error) {
+	return <div>Error: {error.message}</div>;
+	}
+	
 	const onInputChange = (e) => {
 		e.preventDefault();
 		setSearchInput(e.target.value);
 	};
 
+	const flatten_object = (object) => {
+		let result = {};
+		for (const i in object) {
+			if ((typeof object[i]) === 'object' && !Array.isArray(object[i])) {
+				const temp = flatten_object(object[i]);
+				for (const j in temp) {
+					result[j] = temp[j];
+				}
+			} else {
+				result[i] = object[i];
+			}
+		}
+		return result;
+	};
+	
 	const filteredData = users.filter((user) => {
-		//if no input the return the original
+		user = flatten_object(user);
 		if (searchInput === '') {
 			return user;
-		}
-		//return the item which contains the user input
-		else {
+		} else {
 			return Object.values(user).join('').toLowerCase().includes(searchInput.toLowerCase());
 		}
 	});
@@ -42,8 +84,9 @@ const SearchBar = () => {
 				<table className="table table-striped table-sm rounded">
 					<thead>
 						<tr>
-							{Object.keys(users[0]).map((value, index) => {
-								return <th scope="col" key={index}>{value}</th>
+							{Object.keys(flatten_object(users)).map((value, index) => {
+								return <th scope="col" key={index}>{value}</th>	
+
 							})}
 						</tr>
 					</thead>
@@ -51,16 +94,11 @@ const SearchBar = () => {
 						{filteredData.map((user, index) => {
 							return (
 								<tr key={index}>
-									<td>{user._id}</td>
-									<td>{user.firstName}</td>
-									<td>{user.lastName}</td>
-									<td>{user.email}</td>
+									<td>{user.id}</td>
+									<td>{user.sin.created}</td>
+									<td>{user.sin.pub}</td>
+									<td>{user.sin.sin}</td>
 									<td>{user.role}</td>
-									<td>{user.createdAt}</td>
-									<td>{user.updatedAt}</td>
-									<td>{user.__v}</td>
-									<td>{user.iat}</td>
-									<td>{user.expiresAt}</td>
 								</tr>
 							)
 						})}
