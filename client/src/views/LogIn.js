@@ -10,7 +10,7 @@ class Login extends Component {
 		super(props)
 		this.state = {
 			title: '',
-			fields: { id: process.env.ID, password: process.env.PASSWORD, message: '' }
+			fields: { id: process.env.REACT_APP_ID, password: process.env.REACT_APP_PASSWORD, message: '' }
 		}
 	}
 
