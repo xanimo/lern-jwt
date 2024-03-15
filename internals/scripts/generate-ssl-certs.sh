@@ -3,7 +3,7 @@
 if [ ! -e index.js ]
 then
 	echo "Error: could not find main application server file"
-	echo "You should run the generate-ssl-certs.sh script from the main MERN application root directory"
+	echo "You should run the generate-ssl-certs.sh script from the main lern application root directory"
 	echo "i.e: bash scripts/generate-ssl-certs.sh"
 	exit -1
 fi

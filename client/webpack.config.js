@@ -12,7 +12,7 @@ const Dotenv = require('dotenv-webpack');
 require('dotenv').config();
 
 module.exports = {
-    mode: 'production',
+    mode: 'development',
     devtool: "inline-source-map",
     entry: './src/index.js',
     output: {

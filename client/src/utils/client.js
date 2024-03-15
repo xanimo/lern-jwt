@@ -1,158 +1,17 @@
 import axios from 'axios';
 import { jwtDecode } from "jwt-decode";
 import dogeauth from 'dogeauth';
-import base58 from 'bs58';
-
-/*
-Import an AES secret key from an ArrayBuffer containing the raw bytes.
-Takes an ArrayBuffer string containing the bytes, and returns a Promise
-that will resolve to a CryptoKey representing the secret key.
-*/
-async function importSecretKey(rawKey) {
-return await window.crypto.subtle.importKey(
-	"raw",
-	rawKey,
-	"AES-CBC",
-	true,
-	["encrypt", "decrypt"]
-);
-}
-
-/*
-Store the calculated ciphertext and IV here, so we can decrypt the message later.
-*/
-let ciphertext;
-let iv;
-
-async function encryptMessage(key, message) {
-	let encoded = TextEncoder.prototype["encode"] = message;
-	console.log(encoded);
-
-	// The iv must never be reused with a given key.
-	iv = Buffer.from(window.crypto.getRandomValues(new Uint8Array(16)));
-	key = await importSecretKey(key);
-	ciphertext = await window.crypto.subtle.encrypt(
-	{
-		name: "AES-CBC",
-		iv
-	},
-	key,
-	encoded
-	);
-	console.log('encrypt iv', iv);
-	let buffer = new Uint8Array(ciphertext, 0);
-	console.log(`${buffer}...[${ciphertext.byteLength} bytes total]`);
-	return iv.toString('hex') + ':' + base58.encode(buffer);
-}
-
-/*
-Fetch the ciphertext and decrypt it.
-Write the decrypted message into the "Decrypted" box.
-*/
-async function decryptMessage(key, ciphertext) {
-	console.log('ciphertext', ciphertext);
-	console.log('iv', iv);
-	const parts = ciphertext.split(':');
-	console.log(parts[0]);
-	console.log(parts[1]);
-	iv = Buffer.from(parts[0], 'hex');
-	console.log('iv', iv);
-	console.log();
-	ciphertext = base58.decode(parts[1]);
-	console.log('ciphertext updated:', ciphertext);
-	key = await importSecretKey(key);
-	console.log('key', key);
-	let decrypted = await window.crypto.subtle.decrypt(
-	{
-		name: "AES-CBC",
-		iv
-	},
-	key,
-	ciphertext
-	);
-
-	let dec = new TextDecoder();
-	return dec.decode(decrypted);
-}
+import { encryptMessage, decryptMessage } from './crypt';
+import { JsonToArray, binArrayToJson } from './json';
 
 const API_URL = 'https://localhost:3001';
 
 const client = axios.create({
 });
 
-client.JsonToArray = async function JsonToArray(json)
-{
-	var str = JSON.stringify(json, null, 0);
-	var ret = new Uint8Array(str.length);
-	for (var i = 0; i < str.length; i++) {
-		ret[i] = str.charCodeAt(i);
-	}
-	return await ret
-};
+client.JsonToArray = JsonToArray;
 
-client.binArrayToJson = async function binArrayToJson(binArray)
-{
-	var str = "";
-	for (var i = 0; i < binArray.length; i++) {
-		str += String.fromCharCode(parseInt(binArray[i]));
-	}
-	return await JSON.parse(str)
-}
-
-/*
-Get the encoded message, encrypt it and display a representation
-of the ciphertext in the "Ciphertext" element.
-*/
-client.encrypt = async function encryptMessage(key, message) {
-	let encoded = TextEncoder.prototype["encode"] = message;
-	console.log(encoded);
-
-	// The iv must never be reused with a given key.
-	iv = Buffer.from(window.crypto.getRandomValues(new Uint8Array(16)));
-	key = await importSecretKey(key);
-	ciphertext = await window.crypto.subtle.encrypt(
-	{
-		name: "AES-CBC",
-		iv
-	},
-	key,
-	encoded
-	);
-	console.log('encrypt iv', iv);
-	let buffer = new Uint8Array(ciphertext, 0);
-	console.log(`${buffer}...[${ciphertext.byteLength} bytes total]`);
-	return iv.toString('hex') + ':' + base58.encode(buffer);
-}
-
-/*
-Fetch the ciphertext and decrypt it.
-Write the decrypted message into the "Decrypted" box.
-*/
-client.decrypt = async function decryptMessage(key, ciphertext) {
-	console.log('ciphertext', ciphertext);
-	console.log('iv', iv);
-	const parts = ciphertext.split(':');
-	console.log(parts[0]);
-	console.log(parts[1]);
-	iv = Buffer.from(parts[0], 'hex');
-	console.log('iv', iv);
-	console.log();
-	ciphertext = base58.decode(parts[1]);
-	console.log('ciphertext updated:', ciphertext);
-	key = await importSecretKey(key);
-	console.log('key', key);
-	let decrypted = await window.crypto.subtle.decrypt(
-	{
-		name: "AES-CBC",
-		iv
-	},
-	key,
-	ciphertext
-	);
-
-	let dec = new TextDecoder();
-	return dec.decode(decrypted);
-}
+client.binArrayToJson = binArrayToJson;
 
 client.getToken = function () {
 	return localStorage.getItem('token');
@@ -246,12 +105,7 @@ client.getProtectedRoute = async function (command, args) {
 
 client.logIn = async function (credentials) {
 	const encoded = Buffer.from(await this.JsonToArray(credentials));
-	console.log(encoded);
-	console.log(process.env.REACT_APP_PRIVATE_KEY_HEX);
 	const encrypted = await encryptMessage(Buffer.from(process.env.REACT_APP_PRIVATE_KEY_HEX, 'hex'), encoded);
-	console.log(encrypted);
-	// const decrypted = await decryptMessage(Buffer.from(process.env.REACT_APP_PRIVATE_KEY_HEX, 'hex'), encrypted);
-	// console.log(decrypted);
 	const data = { encrypted };
 	const url = `${API_URL}/api/users/authenticate`;
 	const headers = {
@@ -264,12 +118,7 @@ client.logIn = async function (credentials) {
 		data: data,
 		headers: headers
 	});
-
-	console.log('data', serverResponse.data);
-	console.log('token', serverResponse.data.token);
-	console.log('encrypted', serverResponse.data.encrypted);
 	const decrypted = await decryptMessage(Buffer.from(process.env.REACT_APP_PRIVATE_KEY_HEX, 'hex'), serverResponse.data.encrypted);
-	console.log('decrypted', decrypted);
 	const token = JSON.parse(decrypted);
 	if (token) {
 		this.defaults.headers.common['x-identity'] = headers['x-identity'];
@@ -277,7 +126,6 @@ client.logIn = async function (credentials) {
 		// sets token as an included header for all subsequent api requests
 		this.defaults.headers.common.token = this.setToken(JSON.stringify(serverResponse.data.encrypted));
 		const decodedToken = jwtDecode(token);
-		console.log(decodedToken);
 		localStorage.setItem('user', JSON.stringify(serverResponse.data.encrypted));
 		localStorage.setItem('token', token);
 		return decodedToken
@@ -340,7 +188,9 @@ client.update = async function (credentials) {
 	console.log('data', serverResponse.data);
 	console.log('token', serverResponse.data.token);
 	console.log('encrypted', serverResponse.data.encrypted);
-	const token = serverResponse.data.token;
+	const decrypted = await decryptMessage(Buffer.from(process.env.REACT_APP_PRIVATE_KEY_HEX, 'hex'), serverResponse.data.encrypted);
+	console.log('decrypted', decrypted);
+	const token = JSON.parse(decrypted);
 	if (token) {
 		this.defaults.headers.common['x-identity'] = headers['x-identity'];
 		this.defaults.headers.common['x-signature'] = headers['x-signature'];
@@ -348,7 +198,7 @@ client.update = async function (credentials) {
 		this.defaults.headers.common.token = this.setToken(token);
 		const decodedToken = jwtDecode(token);
 		console.log(decodedToken);
-		localStorage.setItem('user', JSON.stringify(decodedToken));
+		localStorage.setItem('user', serverResponse.data.encrypted);
 		localStorage.setItem('token', token);
 		return serverResponse.data;
 	}

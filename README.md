@@ -1,4 +1,4 @@
-# mern-jwt
+# lern-jwt
 
 assumes you have docker setup:
 

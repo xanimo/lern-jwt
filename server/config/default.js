@@ -1,8 +1,8 @@
 module.exports = {
 	app: {
-		title: 'mern-stack',
-		description: 'mern boilerplate',
-		keywords: 'MongoDB Express React Node',
+		title: 'lern-stack',
+		description: 'lern boilerplate',
+		keywords: 'Level Express React Node',
 		googleAnalyticsTrackingID: process.env.GOOGLE_ANALYTICS_TRACKING_ID || 'GOOGLE_ANALYTICS_TRACKING_ID' 
 	},
 	port: process.env.PORT || 3001,

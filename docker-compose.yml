@@ -9,7 +9,7 @@ services:
     env_file:
       - ./docker/1.14.7/bullseye/.env
   app:
-    image: xanimo/mern-jwt
+    image: xanimo/lern-jwt
     depends_on:
       - dogecoin
     restart: unless-stopped
