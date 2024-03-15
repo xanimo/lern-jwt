@@ -7,10 +7,6 @@
 import React, { useState, useEffect } from 'react';
 import { client } from '../../utils';
 
-const preInit = async () => {
-	return await client.getUsers();
-}
-
 const SearchBar = () => {
 	const [loading, setLoading] = useState(true);
 	const [error, setError] = useState(null);

@@ -8,21 +8,21 @@ class Dashboard extends Component {
   constructor(props) {
     super(props)
     this.state = {
-      fields: { command: client.getQuery(), args: '', message: '', data: '' }
+      fields: { command: '', args: '', message: '', data: '' }
     }
   }
 
-  handleSubmit = (e) => {
+  handleSubmit = async (e) => {
     e.preventDefault();
-    client.getProtectedRoute(
+    await client.getProtectedRoute(
       this.state.fields.command, 
       this.state.fields.args
       )
-      .then((response) => {
+      .then(async (response) => {
         this.setState({
           fields: {
-            command: client.getQuery(),
-            args: client.getArgs(),
+            command: await client.getQuery(),
+            args: await client.getArgs(),
             message: response.message,
             data: response.data
           }

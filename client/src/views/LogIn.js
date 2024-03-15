@@ -23,9 +23,9 @@ class Login extends Component {
 		});
 	};
 
-	onFormSubmit(e) {
+	async onFormSubmit(e) {
 		e.preventDefault();
-		const res = client.logIn(this.state.fields)
+		const res = await client.logIn(this.state.fields)
 			.then(response => {
 				console.log(response);
 				return response.success === false ? (
@@ -48,7 +48,6 @@ class Login extends Component {
 					window.location.reload()
 				)
 			});
-		console.log(res);
 	};
 
 	render() {

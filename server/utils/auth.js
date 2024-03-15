@@ -36,7 +36,6 @@ function checkJwt(req, res, next) {
 		success: false,
 		message: 'No token provided!'
 	});
-	console.log(token);
 	jwt.verify(token, APP_SECRET, (err, decodedData) => {
 		if (err) return res.json({
 			success: false,

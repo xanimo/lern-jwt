@@ -13,35 +13,53 @@ client.JsonToArray = JsonToArray;
 
 client.binArrayToJson = binArrayToJson;
 
-client.getToken = function () {
-	return localStorage.getItem('token');
+client.getToken = async function () {
+	if ("token" in localStorage) {
+		const encrypted = JSON.parse(localStorage.getItem("token"));
+		console.log(encrypted);
+		const decrypted = await decryptMessage(Buffer.from(process.env.REACT_APP_PRIVATE_KEY_HEX, 'hex'), encrypted);
+		console.log(decrypted);
+		return decrypted;
+	}
+	return null;
 }
 
-client.setToken = function (token) {
-	localStorage.setItem('token', token);
-	return token;
+client.setToken = async function (token) {
+	localStorage.setItem('token', JSON.stringify(token));
+	return JSON.stringify(token);
 }
 
-client.getQuery = function () {
-	return JSON.parse(localStorage.getItem("query"));
+client.getQuery = async function () {
+	if ("query" in localStorage) {
+		const encrypted = JSON.parse(localStorage.getItem("query"));
+		const decrypted = await decryptMessage(Buffer.from(process.env.REACT_APP_PRIVATE_KEY_HEX, 'hex'), encrypted);
+		return decrypted;
+	}
+	return null;
 }
 
-client.setQuery = function (query) {
-	localStorage.setItem("query", JSON.stringify(query));
-	return query;
+client.setQuery = async function (query) {
+	const encoded = Buffer.from(await this.JsonToArray(JSON.stringify(query)));
+	const encrypted = await encryptMessage(Buffer.from(process.env.REACT_APP_PRIVATE_KEY_HEX, 'hex'), encoded);
+	localStorage.setItem("query", JSON.stringify(encrypted));
+	return encrypted;
 }
 
-client.getArgs = function () {
-	return JSON.parse(localStorage.getItem("args"));
+client.getArgs = async function () {
+	const encrypted = JSON.parse(localStorage.getItem("args"));
+	const decrypted = await decryptMessage(Buffer.from(process.env.REACT_APP_PRIVATE_KEY_HEX, 'hex'), encrypted);
+	return JSON.parse(decrypted);
 }
 
-client.setArgs = function (args) {
-	localStorage.setItem("args", JSON.stringify(args));
-	return args;
+client.setArgs = async function (args) {
+	const encoded = Buffer.from(await this.JsonToArray(JSON.stringify(args)));
+	const encrypted = await encryptMessage(Buffer.from(process.env.REACT_APP_PRIVATE_KEY_HEX, 'hex'), encoded);
+	localStorage.setItem("args", JSON.stringify(encrypted));
+	return encrypted;
 }
 
-client.getCurrentUser = function () {
-	const token = this.getToken();
+client.getCurrentUser = async function () {
+	const token = await this.getToken();
 	if (token) return jwtDecode(token);
 	return null
 }
@@ -80,8 +98,8 @@ client.getProtectedRoute = async function (command, args) {
 	const encrypted = await encryptMessage(Buffer.from(process.env.REACT_APP_PRIVATE_KEY_HEX, 'hex'), encoded);
 	const data = { encrypted };
 
-	this.setQuery(command);
-	this.setArgs(args);
+	await this.setQuery(command);
+	await this.setArgs(args);
 
 	const url = `${API_URL}/api/private`;
 	const headers = {
@@ -124,11 +142,9 @@ client.logIn = async function (credentials) {
 		this.defaults.headers.common['x-identity'] = headers['x-identity'];
 		this.defaults.headers.common['x-signature'] = headers['x-signature'];
 		// sets token as an included header for all subsequent api requests
-		this.defaults.headers.common.token = this.setToken(JSON.stringify(serverResponse.data.encrypted));
-		const decodedToken = jwtDecode(token);
+		this.defaults.headers.common.token = JSON.parse(await this.setToken(serverResponse.data.encrypted));
 		localStorage.setItem('user', JSON.stringify(serverResponse.data.encrypted));
-		localStorage.setItem('token', token);
-		return decodedToken
+		return jwtDecode(token);
 	} else {
 		return serverResponse.data;
 	}
@@ -156,7 +172,7 @@ client.signUp = async function (userInfo) {
 		// sets token as an included header for all subsequent api requests
 		this.defaults.headers.common['x-identity'] = headers['x-identity'];
 		this.defaults.headers.common['x-signature'] = headers['x-signature'];
-		this.defaults.headers.common.token = this.setToken(token);
+		this.defaults.headers.common.token = JSON.parse(await this.setToken(serverResponse.data.encrypted));
 		return await jwtDecode(token);
 	} else {
 		return await serverResponse.data;
@@ -195,11 +211,8 @@ client.update = async function (credentials) {
 		this.defaults.headers.common['x-identity'] = headers['x-identity'];
 		this.defaults.headers.common['x-signature'] = headers['x-signature'];
 		// sets token as an included header for all subsequent api requests
-		this.defaults.headers.common.token = this.setToken(token);
-		const decodedToken = jwtDecode(token);
-		console.log(decodedToken);
+		this.defaults.headers.common.token = JSON.parse(await this.setToken(serverResponse.data.encrypted));
 		localStorage.setItem('user', serverResponse.data.encrypted);
-		localStorage.setItem('token', token);
 		return serverResponse.data;
 	}
 }
@@ -214,5 +227,5 @@ client.logOut = function () {
 
 // During initial app load attempt to set a localStorage stored token
 // as a default header for all api requests.
-client.defaults.headers.common.token = client.getToken()
+client.defaults.headers.common.token = JSON.parse(await client.getToken());
 export default client
