@@ -1,15 +1,19 @@
 #!/bin/bash
 
-if docker inspect lern-jwt | grep -o '"Status": "running"'; then
+if docker inspect lern-jwt | grep -o '"Status":'; then
     echo true
     docker stop lern-jwt
     docker rm lern-jwt
 fi
 
-if docker inspect dogecoin | grep -o '"Status": "running"'; then
+if docker inspect dogecoin | grep -o '"Status":'; then
     echo true
     docker stop dogecoin
     docker rm dogecoin
+fi
+
+if docker network inspect dogecoin | grep -o "\[\]"; then
+    docker network create dogecoin
 fi
 
 docker run -it --restart=always -d --network=dogecoin -v /mnt/volumes/core:/home/dogecoin/.dogecoin --name dogecoin -t xanimo/dogecoin:1.14.7
