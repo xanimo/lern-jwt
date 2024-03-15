@@ -3,6 +3,9 @@ version: "3.8"
 services:
   dogecoin:
     image: xanimo/dogecoin:1.14.7
+    hostname: dogecoin
+    networks:
+      - dogecoin
     volumes:
     - /mnt/volumes/core:/home/dogecoin/.dogecoin
     restart: unless-stopped
@@ -12,7 +15,14 @@ services:
     image: xanimo/lern-jwt
     depends_on:
       - dogecoin
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+    networks:
+      - dogecoin
     restart: unless-stopped
     ports:
       - "3001:3001"
-    env_file: .env
+
+networks:
+  dogecoin:
+    external: true

@@ -1,8 +1,8 @@
 import { such, core } from '../lib';
 
 const commands = [
-  ...such
-  // ,...core
+  // ...such,
+  ...core
 ]
 
 commands.is_command = (command) => {

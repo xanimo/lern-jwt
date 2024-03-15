@@ -2,8 +2,8 @@ const core = require('./core');
 const such = require('./such');
 
 const commands = module.exports.commands = [
-  ...core,
-  ...such
+  ...core
+  // ,...such
 ]
 
 module.exports.is_command = (command) => {

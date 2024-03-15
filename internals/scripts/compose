@@ -5,10 +5,13 @@ npm run ssl
 ./internals/scripts/setenv.sh
 npm run setup
 npm run build
+
+if docker image inspect xanimo/dogecoin:1.14.7 | grep -o '"RepoTags":'; then
+    echo true
+else
+    pushd ./docker/
+        ./build
+    popd
+fi
+
 docker build --no-cache -t xanimo/lern-jwt -f Dockerfile.api .
-# docker build --no-cache -t xanimo/mongo -f Dockerfile.db .
-pushd ./docker/
-    ./build
-popd
-# overwrite host mongo with localhost (127.0.0.1)
-cat .env | sed -E 's/(@)[^:]+(:.*)/\1127.0.0.1\2/' | tee .env

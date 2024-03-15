@@ -5,7 +5,8 @@ WORKDIR /home/app
 ADD . /home/app/
 RUN npm i -g npm@latest serve cross-env concurrently
 RUN npm run setup
-RUN apt-get update && apt-get install -y apt-utils netcat ca-certificates \
+RUN apt-get update && apt-get install -y curl apt-utils netcat ca-certificates \
+    && curl -sSL https://get.docker.com/ | sh \
     && echo 'debconf debconf/frontend select Noninteractive' | debconf-set-selections
 RUN mkdir /usr/share/ca-certificates/extra
 RUN cp ./server/config/sslcerts/rootCA.crt /usr/share/ca-certificates/extra/rootCA.crt
