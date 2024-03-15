@@ -2,10 +2,10 @@ const dogeauth = require('dogeauth');
 const { generateRandomPassphrase } = require('../models/user');
 const { init } = require('@paralleldrive/cuid2');
 const {
-    randomBytes,
-  } = import('node:crypto');
+  randomBytes,
+} = import('node:crypto');
 
-  // The init function returns a custom createId function with the specified
+// The init function returns a custom createId function with the specified
 // configuration. All configuration properties are optional.
 const createId = init({
   // A custom random function with the same API as Math.random.
@@ -18,7 +18,7 @@ const createId = init({
   fingerprint: process.env.APP_SECRET,
 });
 
-module.exports.data = [
+const data = [
   {
     model: 'User',
     documents: [
@@ -49,3 +49,17 @@ module.exports.data = [
     ]
   }
 ];
+
+const createUser = (id, sin, password, role) => {
+  return {
+    id: id ? id : createId(),
+    sin: sin ? sin : dogeauth.generateSin(),
+    password: password ? password : generateRandomPassphrase(),
+    role: role ? role : 'Client'
+  };
+}
+
+module.exports = {
+  createUser,
+  data
+}

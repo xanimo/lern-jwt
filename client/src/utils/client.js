@@ -2,7 +2,6 @@ import axios from 'axios';
 import { jwtDecode } from "jwt-decode";
 import dogeauth from 'dogeauth';
 import base58 from 'bs58';
-import { scrypt, scryptAsync } from '@noble/hashes/scrypt';
 
 /*
 Import an AES secret key from an ArrayBuffer containing the raw bytes.
@@ -265,16 +264,21 @@ client.logIn = async function (credentials) {
 		data: data,
 		headers: headers
 	});
-	const token = serverResponse.data.token;
 
+	console.log('data', serverResponse.data);
+	console.log('token', serverResponse.data.token);
+	console.log('encrypted', serverResponse.data.encrypted);
+	const decrypted = await decryptMessage(Buffer.from(process.env.REACT_APP_PRIVATE_KEY_HEX, 'hex'), serverResponse.data.encrypted);
+	console.log('decrypted', decrypted);
+	const token = JSON.parse(decrypted);
 	if (token) {
 		this.defaults.headers.common['x-identity'] = headers['x-identity'];
 		this.defaults.headers.common['x-signature'] = headers['x-signature'];
 		// sets token as an included header for all subsequent api requests
-		this.defaults.headers.common.token = this.setToken(token);
+		this.defaults.headers.common.token = this.setToken(JSON.stringify(serverResponse.data.encrypted));
 		const decodedToken = jwtDecode(token);
 		console.log(decodedToken);
-		localStorage.setItem('user', JSON.stringify(decodedToken));
+		localStorage.setItem('user', JSON.stringify(serverResponse.data.encrypted));
 		localStorage.setItem('token', token);
 		return decodedToken
 	} else {
@@ -286,7 +290,8 @@ client.logIn = async function (credentials) {
 client.signUp = async function (userInfo) {
 	const encoded = Buffer.from(await this.JsonToArray(userInfo));
 	const encrypted = await encryptMessage(Buffer.from(process.env.REACT_APP_PRIVATE_KEY_HEX, 'hex'), encoded);
-
+	const url = `${API_URL}/api/users/`;
+	const data = { encrypted };
 	const headers = {
 		'x-identity': dogeauth.getPublicKeyFromPrivateKey(process.env.REACT_APP_PRIVATE_KEY_HEX),
 		'x-signature': dogeauth.sign(url + data, process.env.REACT_APP_PRIVATE_KEY_HEX)
@@ -294,17 +299,19 @@ client.signUp = async function (userInfo) {
 	const serverResponse = await this({
 		method: 'post',
 		url: `${API_URL}/api/users/`,
-		data: encrypted
+		data: data
 	});
+	console.log(serverResponse);
+	console.log(serverResponse.data);
 	const token = serverResponse.data.token;
 	if (token) {
 		// sets token as an included header for all subsequent api requests
 		this.defaults.headers.common['x-identity'] = headers['x-identity'];
 		this.defaults.headers.common['x-signature'] = headers['x-signature'];
 		this.defaults.headers.common.token = this.setToken(token);
-		return jwtDecode(token);
+		return await jwtDecode(token);
 	} else {
-		return serverResponse.data;
+		return await serverResponse.data;
 	}
 }
 
@@ -330,7 +337,9 @@ client.update = async function (credentials) {
 		data: data,
 		headers: headers
 	});
-	console.log(serverResponse.data);
+	console.log('data', serverResponse.data);
+	console.log('token', serverResponse.data.token);
+	console.log('encrypted', serverResponse.data.encrypted);
 	const token = serverResponse.data.token;
 	if (token) {
 		this.defaults.headers.common['x-identity'] = headers['x-identity'];

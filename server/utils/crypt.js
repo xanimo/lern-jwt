@@ -33,7 +33,7 @@ async function encryptMessage(key, message) {
     // The iv must never be reused with a given key.
     iv = Buffer.from(crypto.webcrypto.getRandomValues(new Uint8Array(16)));
     key = await importSecretKey(key);
-    ciphertext = await crypto.webcrypto.subtle.encrypt({ name: "AES-CBC", iv }, key, encoded );
+    ciphertext = await crypto.webcrypto.subtle.encrypt({ name: "AES-CBC", iv }, key, encoded);
     console.log('encrypt iv', iv);
     let buffer = new Uint8Array(ciphertext, 0);
     console.log(`${buffer}...[${ciphertext.byteLength} bytes total]`);
@@ -71,6 +71,7 @@ const decryptMessage = async (key, ciphertext) => {
 }
 
 module.exports = {
+    importSecretKey,
     encryptMessage,
     decryptMessage
 }
