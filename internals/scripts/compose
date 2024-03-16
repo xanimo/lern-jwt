@@ -14,4 +14,8 @@ else
     popd
 fi
 
+if [ ! -d "./data/users" ]; then
+    mkdir -p ./data/users
+fi
+
 docker build --no-cache -t xanimo/lern-jwt -f Dockerfile.api .
